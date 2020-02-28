@@ -9,9 +9,8 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
 const isEnvDevelopment = process.env.NODE_ENV === 'development';
 
-const envFileName = isEnvDevelopment
-  ? `${config.name}-dev.js`
-  : `${config.name}-prod.js`;
+const envFileName = config =>
+  isEnvDevelopment ? `${config.name}-dev.js` : `${config.name}-prod.js`;
 
 // console.log(envConf);
 
@@ -36,12 +35,12 @@ function genMeta(config) {
 
   for (const conf in config) {
     if (config.hasOwnProperty(conf)) {
-      if (conf === 'configurations') continue;
+      if (conf === 'configurations' || conf === 'baseURL') continue;
       const element = config[conf];
       if (Array.isArray(element)) {
         headers += parseArray(conf, element);
       } else {
-        headers += appHeaders(conf, JSON.stringify(element));
+        headers += appHeaders(conf, element);
       }
     }
     if (envConf.hasOwnProperty(conf)) {
@@ -49,15 +48,17 @@ function genMeta(config) {
       if (Array.isArray(element)) {
         headers += parseArray(conf, element);
       } else {
-        headers += appHeaders(conf, JSON.stringify(element));
+        headers += appHeaders(conf, element);
       }
     }
   }
-  console.log(headers);
+  // console.log(headers);
+  return headers;
 }
 
 module.exports = {
   envFileName,
   resolveApp,
+  isEnvDevelopment,
   genMeta
 };
