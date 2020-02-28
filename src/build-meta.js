@@ -41,7 +41,7 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 const isEnvDevelopment = process.env.TM_ENV === 'development';
 
 const envFileName = config =>
-  isEnvDevelopment ? `${config.name}-dev.js` : `${config.name}-prod.js`;
+  isEnvDevelopment ? `${config.name}-dev.user.js` : `${config.name}-prod.user.js`;
 
 // console.log(envConf);
 
