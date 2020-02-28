@@ -38,7 +38,7 @@ const KEYWORDS = [
 const appDirectory = fs.realpathSync(process.cwd());
 const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
-const isEnvDevelopment = process.env.NODE_ENV === 'development';
+const isEnvDevelopment = process.env.TM_ENV === 'development';
 
 const envFileName = config =>
   isEnvDevelopment ? `${config.name}-dev.js` : `${config.name}-prod.js`;
