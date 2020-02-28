@@ -50,9 +50,12 @@ const appHeaders = (meta, value) =>
 // @${meta}     ${value}
 `.trimLeft();
 
-const parseArray = (mata, value) => {
+const parseArray = (mata, value, prefix = '', suffixParms = '') => {
   if (Array.isArray(value)) {
-    const headers = value.reduce((arr, cur) => arr + appHeaders(mata, cur), '');
+    const headers = value.reduce(
+      (arr, cur) => arr + appHeaders(mata, prefix + cur + suffixParms),
+      ''
+    );
     return headers;
   }
 };
@@ -75,9 +78,11 @@ function genMeta(config) {
       }
     }
     if (envConf.hasOwnProperty(conf)) {
+      const suffixParms = conf === 'require' ? envConf['suffixParms'] : '';
+      const prefix = conf === 'require' ? envConf['baseURL'] : '';
       const element = envConf[conf];
       if (Array.isArray(element)) {
-        headers += parseArray(conf, element);
+        headers += parseArray(conf, element, prefix, suffixParms);
       } else {
         headers += appHeaders(conf, element);
       }
