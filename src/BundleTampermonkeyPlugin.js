@@ -33,15 +33,15 @@ module.exports = function(bundler) {
     });
   };
   function entryPointHandler(bundle) {
-    const dir = bundler.options.outDir;
+    const dir = path.basename(bundler.options.outDir);
     const publicURL = bundler.options.publicURL;
 
-    const requirePath = path.resolve(dir, 'parcel-test.js');
+    const requirePath = resolveApp(`${dir}/${envFileName(config)}`);
     const requireValue = new Map();
 
     console.info('📦PackageRequirePlugin');
     feedRequireValue(bundle, requireValue, publicURL);
-    console.info(`require value: ${requirePath}`);
+    console.info(`require value: ${dir}/${envFileName(config)}`);
 
     const envConf = isEnvDevelopment
       ? config.configurations.development
@@ -57,7 +57,7 @@ module.exports = function(bundler) {
     }
 
     const headers = genMeta(config);
-    fs.writeFileSync(resolveApp(`dist/${envFileName(config)}`), headers);
+    fs.writeFileSync(requirePath, headers);
   }
   bundler.on('bundled', bundle => {
     bundler.options.entryFiles.length > 1
