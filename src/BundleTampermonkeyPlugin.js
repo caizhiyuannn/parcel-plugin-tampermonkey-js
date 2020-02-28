@@ -56,7 +56,10 @@ module.exports = function(bundler) {
       ];
     }
 
-    const headers = genMeta(config);
+    const headers = `// ==UserScript==\n${genMeta(
+      config
+    ).trim()}\n// ==/UserScript==\n`.trimLeft();
+
     fs.writeFileSync(requirePath, headers);
   }
   bundler.on('bundled', bundle => {

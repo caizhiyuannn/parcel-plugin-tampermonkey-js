@@ -2,6 +2,37 @@ const path = require('path');
 const fs = require('fs');
 // const config = require('./config');
 
+const KEYWORDS = [
+  'name',
+  'namespace',
+  'version',
+  'author',
+  'description',
+  'homepage',
+  'homepageURL',
+  'website',
+  'source',
+  'icon',
+  'iconURL',
+  'defaulticon',
+  'icon64',
+  'icon64URL',
+  'updateURL',
+  'downloadURL',
+  'supportURL',
+  'include',
+  'match',
+  'exclude',
+  'require',
+  'resource',
+  'connect',
+  'run-at',
+  'grant',
+  'noframes',
+  'unwrap',
+  'nocompat'
+];
+
 // Make sure any symlinks in the project folder are resolved:
 // https://github.com/facebook/create-react-app/issues/637
 const appDirectory = fs.realpathSync(process.cwd());
@@ -35,7 +66,7 @@ function genMeta(config) {
 
   for (const conf in config) {
     if (config.hasOwnProperty(conf)) {
-      if (conf === 'configurations' || conf === 'baseURL') continue;
+      if (!KEYWORDS.includes(conf)) continue;
       const element = config[conf];
       if (Array.isArray(element)) {
         headers += parseArray(conf, element);
