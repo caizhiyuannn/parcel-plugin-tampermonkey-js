@@ -1,0 +1,23 @@
+{
+  "name": "parcel-plugin-tampermonkey-js",
+  "version": "1.0.0",
+  "description": " create tampermonkey meta",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caizhiyuannn/parcel-plugin-tampermonkey-js.git"
+  },
+  "keywords": [
+    "tampermonkey",
+    "parcel"
+  ],
+  "author": "caizhiyuannn",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/caizhiyuannn/parcel-plugin-tampermonkey-js/issues"
+  },
+  "homepage": "https://github.com/caizhiyuannn/parcel-plugin-tampermonkey-js#readme"
+}
