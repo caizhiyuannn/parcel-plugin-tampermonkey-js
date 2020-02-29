@@ -51,7 +51,9 @@ module.exports = function(bundler) {
       envConf['require'] = Array.from(requireValue.values());
     } else {
       envConf.require = [
-        ...envConf.require,
+        ...envConf.require.filter(
+          e => !Array.from(requireValue.values()).includes(e)
+        ),
         ...Array.from(requireValue.values())
       ];
     }
@@ -60,7 +62,6 @@ module.exports = function(bundler) {
       delete config.updateURL;
     if (isEnvDevelopment && envConf.downloadURL && config.downloadURL)
       delete config.downloadURL;
-
     const headers = `// ==UserScript==\n${genMeta(
       config
     ).trim()}\n// ==/UserScript==\n`.trimLeft();

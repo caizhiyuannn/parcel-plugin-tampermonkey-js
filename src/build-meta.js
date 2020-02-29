@@ -69,7 +69,7 @@ function loadCacheVerion() {
   if (fs.existsSync(tm_version_path)) {
     const tm_obj = require(tm_version_path);
     tm_version = tm_obj.version;
-  } 
+  }
   fs.writeFileSync(
     tm_version_path,
     `module.exports={version: ${tm_version + 1}}`
@@ -97,10 +97,14 @@ function genMeta(config) {
         headers += appHeaders(conf, element);
       }
     }
+  }
+  for (const conf in envConf) {
     if (envConf.hasOwnProperty(conf)) {
+      if (!KEYWORDS.includes(conf)) continue;
       const suffixParms = conf === 'require' ? envConf['suffixParms'] : '';
       const prefix = conf === 'require' ? envConf['baseURL'] : '';
       const element = envConf[conf];
+
       if (Array.isArray(element)) {
         headers += parseArray(conf, element, prefix, suffixParms);
       } else {
