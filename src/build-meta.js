@@ -41,7 +41,9 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 const isEnvDevelopment = process.env.TM_ENV === 'development';
 
 const envFileName = config =>
-  isEnvDevelopment ? `${config.name}-dev.user.js` : `${config.name}-prod.user.js`;
+  isEnvDevelopment
+    ? `${config.name}-dev.user.js`
+    : `${config.name}-prod.user.js`;
 
 // console.log(envConf);
 
@@ -60,6 +62,21 @@ const parseArray = (mata, value, prefix = '', suffixParms = '') => {
   }
 };
 
+function loadCacheVerion() {
+  let tm_version = 0;
+  const tm_version_path = resolveApp('.cache/.tm_version.js');
+  if (!fs.existsSync(resolveApp('.cache'))) fs.mkdirSync(resolveApp('.cache'));
+  if (fs.existsSync(tm_version_path)) {
+    const tm_obj = require(tm_version_path);
+    tm_version = tm_obj.version;
+  } 
+  fs.writeFileSync(
+    tm_version_path,
+    `module.exports={version: ${tm_version + 1}}`
+  );
+  return tm_version;
+}
+
 function genMeta(config) {
   let headers = '';
 
@@ -70,7 +87,10 @@ function genMeta(config) {
   for (const conf in config) {
     if (config.hasOwnProperty(conf)) {
       if (!KEYWORDS.includes(conf)) continue;
-      const element = config[conf];
+      const element =
+        isEnvDevelopment && conf === 'version'
+          ? `1.0.0-dev-${loadCacheVerion()}`
+          : config[conf];
       if (Array.isArray(element)) {
         headers += parseArray(conf, element);
       } else {
