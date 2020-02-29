@@ -68,4 +68,7 @@ module.exports = function(bundler) {
       : entryPointHandler(bundle);
     // console.log(bundler.entryAsset.bundles);
   });
+  if (bundler.options.watch && isEnvDevelopment) {
+    bundler.serve();
+  }
 };
