@@ -56,6 +56,11 @@ module.exports = function(bundler) {
       ];
     }
 
+    if (isEnvDevelopment && envConf.updateURL && config.updateURL)
+      delete config.updateURL;
+    if (isEnvDevelopment && envConf.downloadURL && config.downloadURL)
+      delete config.downloadURL;
+
     const headers = `// ==UserScript==\n${genMeta(
       config
     ).trim()}\n// ==/UserScript==\n`.trimLeft();
