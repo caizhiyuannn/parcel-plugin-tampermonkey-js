@@ -62,21 +62,6 @@ const parseArray = (mata, value, prefix = '', suffixParms = '') => {
   }
 };
 
-function loadCacheVerion() {
-  let tm_version = 0;
-  const tm_version_path = resolveApp('.cache/.tm_version');
-  if (!fs.existsSync(resolveApp('.cache'))) fs.mkdirSync(resolveApp('.cache'));
-  if (fs.existsSync(tm_version_path)) {
-    const tm_obj = JSON.parse(fs.readFileSync(tm_version_path, 'utf8'));
-    tm_version = tm_obj.version;
-  }
-  fs.writeFileSync(
-    tm_version_path,
-    JSON.stringify({ version: tm_version + 1 })
-  );
-  return tm_version;
-}
-
 function genMeta(config) {
   let headers = '';
 
@@ -89,7 +74,7 @@ function genMeta(config) {
       if (!KEYWORDS.includes(conf)) continue;
       const element =
         isEnvDevelopment && conf === 'version'
-          ? `1.0.0-dev-${loadCacheVerion()}`
+          ? `1.0.0-dev+${new Date().getTime()}`
           : config[conf];
       if (Array.isArray(element)) {
         headers += parseArray(conf, element);
