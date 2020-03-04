@@ -1,20 +1,44 @@
 const fs = require('fs');
 const path = require('path');
+const deepMerge = require('deepmerge');
 const {
   genMeta,
   envFileName,
   isEnvDevelopment,
   resolveApp
 } = require('./build-meta');
-const conf_path = resolveApp('.tampermonkey-config.js');
+const loadconfig = require('./load-config');
+
+const combineMerge = (target, source, options) => {
+  const destination = target.slice();
+
+  source.forEach((item, index) => {
+    if (typeof destination[index] === 'undefined') {
+      destination[index] = options.cloneUnlessOtherwiseSpecified(item, options);
+    } else if (options.isMergeableObject(item)) {
+      destination[index] = merge(target[index], item, options);
+    } else if (target.indexOf(item) === -1) {
+      destination.push(item);
+    }
+  });
+  return destination;
+};
 
 module.exports = function(bundler) {
-  if (!fs.existsSync(conf_path)) {
-    throw Error(`${conf_path} is not exists!`);
-  }
-  const config = require(conf_path);
+  let config = loadconfig.sync(process.cwd());
 
   const feedRequireValue = (bundle, requireValue, publicURL) => {
+    let assetsMap = new Map();
+    switch (bundle.type) {
+      case 'js':
+        assetsMap = requireValue.require;
+        break;
+      case 'css':
+        assetsMap = requireValue.resource;
+        break;
+      default:
+        break;
+    }
     let name = path.join(publicURL, path.basename(bundle.name));
 
     const input = bundle.entryAsset
@@ -23,8 +47,8 @@ module.exports = function(bundler) {
       ? bundle.assets.values().next().value.relativeName
       : null;
 
-    if (input && !requireValue.get(input)) {
-      requireValue.set(input, name);
+    if (input && !assetsMap.get(input)) {
+      assetsMap.set(input, name);
       console.info(`bundle: ${input} => ${name}`);
     }
 
@@ -35,36 +59,50 @@ module.exports = function(bundler) {
   function entryPointHandler(bundle) {
     const dir = path.basename(bundler.options.outDir);
     const publicURL = bundler.options.publicURL;
+    const protocol = bundler.options.https ? 'https' : 'http';
+    const port = bundler.server ? bundler.server.address().port : 0;
+    const host = bundler.options.hmrHostname
+      ? bundler.options.hmrHostname
+      : 'localhost';
 
     const requirePath = resolveApp(`${dir}/${envFileName(config)}`);
-    const requireValue = new Map();
+    const requireValue = {
+      require: new Map(),
+      resource: new Map()
+    };
+    const assetsRequireConfig = { require: [], resource: [], grant: [] };
+
+    const combineURL = name => {
+      const prefix = isEnvDevelopment
+        ? `${protocol}://${host}:${port}`
+        : config.baseURL;
+      const params = isEnvDevelopment ? '' : config.params;
+      return `${prefix}${name}${params}`;
+    };
 
     console.info('📦PackageRequirePlugin');
     feedRequireValue(bundle, requireValue, publicURL);
     console.info(`require value: ${dir}/${envFileName(config)}`);
 
-    const envConf = isEnvDevelopment
-      ? config.configurations.development
-      : config.configurations.production;
-
-    if (!envConf.require) {
-      envConf['require'] = Array.from(requireValue.values());
-    } else {
-      envConf.require = [
-        ...envConf.require.filter(
-          e => !Array.from(requireValue.values()).includes(e)
-        ),
-        ...Array.from(requireValue.values())
-      ];
+    for (const assetsType in requireValue) {
+      if (requireValue.hasOwnProperty(assetsType)) {
+        const element = requireValue[assetsType];
+        assetsRequireConfig[assetsType] = Array.from(element.values()).map(
+          value => `${combineURL(value)}`
+        );
+      }
     }
+    assetsRequireConfig.grant =
+      assetsRequireConfig.resource.length !== 0
+        ? ['GM_addStyle', 'GM_getResourceText']
+        : [];
 
-    if (isEnvDevelopment && envConf.updateURL && config.updateURL)
-      delete config.updateURL;
-    if (isEnvDevelopment && envConf.downloadURL && config.downloadURL)
-      delete config.downloadURL;
-    const headers = `// ==UserScript==\n${genMeta(
-      config
-    ).trim()}\n// ==/UserScript==\n`.trimLeft();
+    config = deepMerge(config, assetsRequireConfig, {
+      arrayMerge: combineMerge
+    });
+    // console.log(config);
+
+    const headers = genMeta(config);
 
     fs.writeFileSync(requirePath, headers);
   }
@@ -74,7 +112,7 @@ module.exports = function(bundler) {
       : entryPointHandler(bundle);
     // console.log(bundler.entryAsset.bundles);
   });
-  if (bundler.options.watch && isEnvDevelopment) {
+  if (bundler.options.watch && isEnvDevelopment && !bundler.server) {
     bundler.serve();
   }
 };
