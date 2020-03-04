@@ -1,6 +1,7 @@
 'use strict';
 
 const other = require('./other');
+const { TMKEYWORDS } = require('../constants');
 
 const env = process.env.TM_ENV
   ? process.env.TM_ENV
@@ -15,14 +16,15 @@ const environment = config => {
     if (env_config && typeof env_config === 'object') {
       Object.keys(env_config).forEach(key => {
         switch (key) {
-          case 'updateURL':
-          case 'downloadURL':
+          case TMKEYWORDS.updateURL:
+          case TMKEYWORDS.downloadURL:
             if (typeof env_config[key] === 'string') break;
-          case 'include':
-          case 'exclude':
-          case 'require':
-          case 'resource':
-          case 'connect':
+          case TMKEYWORDS.include:
+          case TMKEYWORDS.exclude:
+          case TMKEYWORDS.require:
+          case TMKEYWORDS.resource:
+          case TMKEYWORDS.match:
+          case TMKEYWORDS.connect:
             if (Array.isArray(env_config[key])) break;
           default:
             return;
