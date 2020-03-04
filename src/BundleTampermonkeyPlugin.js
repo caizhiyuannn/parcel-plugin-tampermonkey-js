@@ -82,7 +82,6 @@ module.exports = function(bundler) {
 
     console.info('📦PackageRequirePlugin');
     feedRequireValue(bundle, requireValue, publicURL);
-    console.info(`require value: ${dir}/${envFileName(config)}`);
 
     for (const assetsType in requireValue) {
       if (requireValue.hasOwnProperty(assetsType)) {
@@ -96,11 +95,16 @@ module.exports = function(bundler) {
       assetsRequireConfig.resource.length !== 0
         ? ['GM_addStyle', 'GM_getResourceText']
         : [];
+    const updateMetaURL = combineURL(envFileName(config));
+    const updateMeta = isEnvDevelopment
+      ? { updateURL: updateMetaURL, downloadURL: updateMetaURL }
+      : {};
 
-    config = deepMerge(config, assetsRequireConfig, {
+    console.info(`updateURL: ${updateMetaURL}`);
+
+    config = deepMerge.all([config, updateMeta, assetsRequireConfig], {
       arrayMerge: combineMerge
     });
-    // console.log(config);
 
     const headers = genMeta(config);
 
