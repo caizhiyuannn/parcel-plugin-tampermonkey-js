@@ -1,6 +1,6 @@
 {
   "name": "parcel-plugin-tampermonkey-js",
-  "version": "1.5.3",
+  "version": "2.0.1",
   "description": "auto create tampermonkey meta js",
   "main": "index.js",
   "scripts": {
