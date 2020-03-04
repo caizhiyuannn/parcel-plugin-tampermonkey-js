@@ -11,8 +11,8 @@ const isEnvDevelopment = process.env.TM_ENV === 'development';
 
 const envFileName = config =>
   isEnvDevelopment
-    ? `${config.name}-dev.user.js`
-    : `${config.name}-prod.user.js`;
+    ? `/${config.name.trim().replace(' ', '-')}-dev.user.js`
+    : `/${config.name.trim().replace(' ', '-')}-prod.user.js`;
 
 // console.log(envConf);
 
